@@ -41,11 +41,26 @@ class OknoZGZ(QWidget):
 
                 if ok_pressed:
                     print(f"Podana odległość: {odleglosc}")
-                    self.close()
+                    self.show_wspolrzedne_prostokatne_dialog()
             else:
                 self.show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
         except ValueError:
             self.show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
+
+    def show_wspolrzedne_prostokatne_dialog(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Przejdziemy teraz do współrzędnych prostokątnych.\n"
+                    "Pamiętaj, aby współrzędne podać w zapisie 5-cyfrowym, np. 39620 lub 39600.\n"
+                    "Zależy od Ciebie, z jaką dokładnością chcesz pracować.")
+
+        # Dodajemy pola do wprowadzenia współrzędnych
+        rzeda_A, ok1 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj rzędą A:')
+        odcieta_A, ok2 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj odciętą A:')
+
+        if ok1 and ok2:
+            print(f"Wprowadzone współrzędne prostokątne: rzęda_A={rzeda_A}, odcieta_A={odcieta_A}")
+            self.close()
 
     def powrot_button_clicked(self):
         self.close()
