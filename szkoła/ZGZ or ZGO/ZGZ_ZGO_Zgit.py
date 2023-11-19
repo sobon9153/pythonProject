@@ -1,6 +1,4 @@
-import sys
-
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit, QMessageBox
 
 
 class OknoZGZ(QWidget):
@@ -14,34 +12,44 @@ class OknoZGZ(QWidget):
         self.setGeometry(200, 200, 400, 200)
         self.setWindowTitle('ZGZ - Podaj Azymut')
 
-        azymut_label = QLabel('Podaj azymut T z punktu do punktu B:', self)
-        azymut_input = QLineEdit(self)
-        azymut_button = QPushButton('OK', self)
-        powrot_button = QPushButton('Powrót', self)
+        self.azymut_label = QLabel('Podaj azymut T z punktu do punktu B:', self)
+        self.azymut_input = QLineEdit(self)
+        self.azymut_button = QPushButton('OK', self)
+        self.powrot_button = QPushButton('Powrót', self)
 
         layout = QVBoxLayout()
-        layout.addWidget(azymut_label)
-        layout.addWidget(azymut_input)
-        layout.addWidget(azymut_button)
-        layout.addWidget(powrot_button)
+        layout.addWidget(self.azymut_label)
+        layout.addWidget(self.azymut_input)
+        layout.addWidget(self.azymut_button)
+        layout.addWidget(self.powrot_button)
 
         self.setLayout(layout)
 
-        azymut_button.clicked.connect(self.ok_button_clicked)
-        powrot_button.clicked.connect(self.powrot_button_clicked)
+        self.azymut_button.clicked.connect(self.ok_button_clicked)
+        self.powrot_button.clicked.connect(self.powrot_button_clicked)
 
     def ok_button_clicked(self):
         try:
-            azymut = int(self.findChild(QLineEdit).text())
-            print(f"Wprowadzony azymut: {azymut}")
-        except ValueError:
-            print("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
+            azymut = int(self.azymut_input.text())
 
-        self.close()
+            if 0 <= azymut <= 6000:  # Sprawdzamy, czy azymut mieści się w zakresie 0-360 stopni
+                print(f"Wprowadzony azymut: {azymut}")
+                self.close()
+            else:
+                self.show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
+        except ValueError:
+            self.show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
 
     def powrot_button_clicked(self):
         self.close()
         self.poprzednie_okno.show()
+
+    def show_error_message(self, message):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(message)
+        msg.setWindowTitle("Błąd")
+        msg.exec_()
 
 
 class MojaAplikacja(QWidget):
@@ -85,7 +93,7 @@ class MojaAplikacja(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication([])
     window = MojaAplikacja()
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()
