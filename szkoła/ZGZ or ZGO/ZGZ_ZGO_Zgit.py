@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit, QMessageBox, \
+    QInputDialog
 
 
 class OknoZGZ(QWidget):
@@ -32,9 +33,15 @@ class OknoZGZ(QWidget):
         try:
             azymut = int(self.azymut_input.text())
 
-            if 0 <= azymut <= 6000:  # Sprawdzamy, czy azymut mieści się w zakresie 0-360 stopni
+            if 0 <= azymut <= 6000:
                 print(f"Wprowadzony azymut: {azymut}")
-                self.close()
+
+                odleglosc, ok_pressed = QInputDialog.getInt(self, 'Podaj odległość',
+                                                            'Podaj odległość między punktem A i punktem B:')
+
+                if ok_pressed:
+                    print(f"Podana odległość: {odleglosc}")
+                    self.close()
             else:
                 self.show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
         except ValueError:
