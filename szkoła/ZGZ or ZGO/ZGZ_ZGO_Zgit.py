@@ -2,7 +2,15 @@ import math
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit, QMessageBox, \
-    QInputDialog
+    QInputDialog, QHBoxLayout
+
+
+def show_error_message(message):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setText(message)
+    msg.setWindowTitle("Błąd")
+    msg.exec_()
 
 
 class OknoZGZ(QWidget):
@@ -13,10 +21,10 @@ class OknoZGZ(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setGeometry(200, 200, 400, 200)
-        self.setWindowTitle('ZGZ - Podaj Azymut')
+        self.setGeometry(500, 300, 260, 200)
+        self.setWindowTitle('ZGZ - Azymut')
 
-        self.azymut_label = QLabel('Podaj azymut T z punktu do punktu B:', self)
+        self.azymut_label = QLabel('Podaj azymut T z punktu A do punktu B:', self)
         self.azymut_input = QLineEdit(self)
         self.azymut_button = QPushButton('OK', self)
         self.powrot_button = QPushButton('Powrót', self)
@@ -43,11 +51,11 @@ class OknoZGZ(QWidget):
                     print(f"Podana odległość: {odleglosc}")
                     self.show_wspolrzedne_prostokatne_dialog(azymut, odleglosc)
             else:
-                self.show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
+                show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
         except ValueError:
-            self.show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
+            show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
 
-        ok_button_clicked = pyqtSignal()
+        pyqtSignal()
 
     def show_wspolrzedne_prostokatne_dialog(self, azymut, odleglosc):
         msg = QMessageBox()
@@ -56,7 +64,6 @@ class OknoZGZ(QWidget):
                     "Pamiętaj, aby współrzędne podać w zapisie 5-cyfrowym, np. 39620 lub 39600.\n"
                     "Zależy od Ciebie, z jaką dokładnością chcesz pracować.")
 
-        # Dodajemy pola do wprowadzenia współrzędnych
         rzedna_a, ok1 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj rzędna A:')
         odcieta_a, ok2 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj odciętą A:')
 
@@ -93,22 +100,68 @@ class OknoZGZ(QWidget):
         self.close()
         self.poprzednie_okno.show()
 
-    def show_error_message(self, message):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setText(message)
-        msg.setWindowTitle("Błąd")
-        msg.exec_()
+
+class OknoZGO(QWidget):
+    def __init__(self, poprzednie_okno):
+        super().__init__()
+
+        self.poprzednie_okno = poprzednie_okno
+        self.init_ui()
+
+    def init_ui(self):
+        self.setGeometry(500, 300, 250, 250)
+        self.setWindowTitle("Współrzędne prostokątne")
+        self.wspolrzedne_guzik_a = QLabel("Podaj współrzędne punktu A")
+        self.rzedna_a_zgo = QLineEdit(self)
+        self.odcieta_a_zgo = QLineEdit(self)
+
+        self.wspolrzedne_guzik_b = QLabel("Podaj współrzędne punktu B")
+        self.rzedna_b_zgo = QLineEdit(self)
+        self.odcieta_b_zgo = QLineEdit(self)
+        self.ok_button = QPushButton('OK', self)
+        self.powrot_button = QPushButton('Powrót', self)
+        main_layout = QVBoxLayout()
+
+        layout_a = QHBoxLayout()
+        layout_a.addWidget(self.wspolrzedne_guzik_a)
+        layout_a.addWidget(self.rzedna_a_zgo)
+        layout_a.addWidget(self.odcieta_a_zgo)
+        main_layout.addLayout(layout_a)
+
+        layout_b = QHBoxLayout()
+        layout_b.addWidget(self.wspolrzedne_guzik_b)
+        layout_b.addWidget(self.rzedna_b_zgo)
+        layout_b.addWidget(self.odcieta_b_zgo)
+        main_layout.addLayout(layout_b)
+
+        main_layout.addWidget(self.ok_button)
+        main_layout.addWidget(self.powrot_button)
+
+        self.setLayout(main_layout)
+
+        pass
 
 
 class MojaAplikacja(QWidget):
     def __init__(self):
         super().__init__()
+        self.okno_zgo = None
+        self.okno_zgz = None
         self.init_ui()
 
+    def zgzs_clicked(self):
+        if not self.okno_zgz or (self.okno_zgz and not self.okno_zgz.isVisible()):
+            self.okno_zgz = OknoZGZ(self)
+            self.okno_zgz.show()
+
+    def zgzo_clicked(self):
+        if not self.okno_zgo or (self.okno_zgo and not self.okno_zgo.isVisible()):
+            self.okno_zgo = OknoZGO(self)
+            self.okno_zgo.show()
+
     def init_ui(self):
-        self.setGeometry(100, 100, 400, 300)
-        self.setWindowTitle('Kalkulator dla Topo')
+        self.setGeometry(500, 250, 400, 200)
+        self.setWindowTitle('Pluton Topo')
 
         zgzs_button = QPushButton('ZGZ', self)
         zgzo_button = QPushButton('ZGO', self)
@@ -121,16 +174,16 @@ class MojaAplikacja(QWidget):
 
         self.setLayout(layout)
 
-        zgzs_button.clicked.connect(self.zgzs_clicked)  # Dodaj to połączenie
+        zgzs_button.clicked.connect(self.zgzs_clicked)
         zgzo_button.clicked.connect(self.zgzo_clicked)
 
     def zgzs_clicked(self):
-        self.okno_zgz = OknoZGZ(self)  # Tworzymy nowe okno OknoZGZ
-        self.okno_zgz.show()  # Pokazujemy nowe okno
+        self.okno_zgz = OknoZGZ(self)
+        self.okno_zgz.show()
 
     def zgzo_clicked(self):
-        self.okno_zgo = OknoZGZ(self)  # Tworzymy nowe okno OknoZGO (przykładowo)
-        self.okno_zgo.show()  # Pokazujemy nowe okno
+        self.okno_zgo = OknoZGO(self)
+        self.okno_zgo.show()
 
 
 if __name__ == '__main__':
