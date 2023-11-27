@@ -138,6 +138,43 @@ class OknoZGO(QWidget):
         main_layout.addWidget(self.powrot_button)
 
         self.setLayout(main_layout)
+        self.ok_button.clicked.connect(self.przetworz_dane_a)
+        self.ok_button.clicked.connect(self.przetworz_dane_b)
+
+    def przetworz_dane_a(self):
+        rzedna_a_zgo = self.rzedna_a_zgo.text()
+        odcieta_a_zgo = self.odcieta_a_zgo.text()
+
+        if len(rzedna_a_zgo) == 5 and rzedna_a_zgo.isdigit():
+            rzedna_a_zgo = float(rzedna_a_zgo)
+        else:
+            print("Podano nieprawidłową rzędną. Spróbuj jeszcze raz.")
+            return
+
+        if len(odcieta_a_zgo) == 5 and odcieta_a_zgo.isdigit():
+            odcieta_a_zgo = float(odcieta_a_zgo)
+        else:
+            print("Podano nieprawidłową odciętą. Spróbuj jeszcze raz.")
+            return
+        print(f"Podano poprawne współrzędne: Rzędna A: {rzedna_a_zgo}, Odcięta A: {odcieta_a_zgo}")
+
+    def przetworz_dane_b(self):
+        rzedna_b_zgo = self.rzedna_b_zgo.text()
+        odcieta_b_zgo = self.odcieta_b_zgo.text()
+
+        if len(rzedna_b_zgo) == 5 and rzedna_b_zgo.isdigit():
+            rzedna_b_zgo = float(rzedna_b_zgo)
+        else:
+            print("Podano nieprawidłową rzędną dla punktu B. Spróbuj jeszcze raz.")
+            return
+
+        if len(odcieta_b_zgo) == 5 and odcieta_b_zgo.isdigit():
+            odcieta_b_zgo = float(odcieta_b_zgo)
+        else:
+            print("Podano nieprawidłową odciętą dla punktu B. Spróbuj jeszcze raz.")
+            return
+
+        print(f"Podano poprawne współrzędne dla punktu B: Rzędna B: {rzedna_b_zgo}, Odcięta B: {odcieta_b_zgo}")
 
         pass
 
