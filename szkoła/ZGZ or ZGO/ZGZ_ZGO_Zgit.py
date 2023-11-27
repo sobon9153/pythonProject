@@ -148,15 +148,25 @@ class OknoZGO(QWidget):
         if len(rzedna_a_zgo) == 5 and rzedna_a_zgo.isdigit():
             rzedna_a_zgo = float(rzedna_a_zgo)
         else:
-            print("Podano nieprawidłową rzędną. Spróbuj jeszcze raz.")
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Podałeś złe wartości dla rzędnej punktu A. Muszą być to dokładnie 5 cyfr.")
+            msg.setWindowTitle("Błąd")
+            msg.addButton(QMessageBox.Ok)
+            msg.exec_()
             return
 
         if len(odcieta_a_zgo) == 5 and odcieta_a_zgo.isdigit():
             odcieta_a_zgo = float(odcieta_a_zgo)
         else:
-            print("Podano nieprawidłową odciętą. Spróbuj jeszcze raz.")
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Podałeś złe wartości dla odciętej punktu A. Muszą być to dokładnie 5 cyfr.")
+            msg.setWindowTitle("Błąd")
+            msg.addButton(QMessageBox.Ok)
+            msg.exec_()
             return
-        print(f"Podano poprawne współrzędne: Rzędna A: {rzedna_a_zgo}, Odcięta A: {odcieta_a_zgo}")
+
 
     def przetworz_dane_b(self):
         rzedna_b_zgo = self.rzedna_b_zgo.text()
@@ -165,16 +175,26 @@ class OknoZGO(QWidget):
         if len(rzedna_b_zgo) == 5 and rzedna_b_zgo.isdigit():
             rzedna_b_zgo = float(rzedna_b_zgo)
         else:
-            print("Podano nieprawidłową rzędną dla punktu B. Spróbuj jeszcze raz.")
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Podałeś złe wartości dla rzędnej punktu B. Muszą być to dokładnie 5 cyfr.")
+            msg.setWindowTitle("Błąd")
+            msg.addButton(QMessageBox.Ok)
+            msg.exec_()
             return
 
         if len(odcieta_b_zgo) == 5 and odcieta_b_zgo.isdigit():
             odcieta_b_zgo = float(odcieta_b_zgo)
         else:
-            print("Podano nieprawidłową odciętą dla punktu B. Spróbuj jeszcze raz.")
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Podałeś złe wartości dla ociętej punktu B. Muszą być to dokładnie 5 cyfr.")
+            msg.setWindowTitle("Błąd")
+            msg.addButton(QMessageBox.Ok)
+            msg.exec_()
             return
 
-        print(f"Podano poprawne współrzędne dla punktu B: Rzędna B: {rzedna_b_zgo}, Odcięta B: {odcieta_b_zgo}")
+
 
         pass
 
