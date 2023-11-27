@@ -1,3 +1,6 @@
+import math
+
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QPushButton, QWidget, QLineEdit, QMessageBox, \
     QInputDialog
 
@@ -32,22 +35,21 @@ class OknoZGZ(QWidget):
     def ok_button_clicked(self):
         try:
             azymut = int(self.azymut_input.text())
-
             if 0 <= azymut <= 6000:
                 print(f"Wprowadzony azymut: {azymut}")
-
                 odleglosc, ok_pressed = QInputDialog.getInt(self, 'Podaj odległość',
                                                             'Podaj odległość między punktem A i punktem B:')
-
                 if ok_pressed:
                     print(f"Podana odległość: {odleglosc}")
-                    self.show_wspolrzedne_prostokatne_dialog()
+                    self.show_wspolrzedne_prostokatne_dialog(azymut, odleglosc)
             else:
                 self.show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
         except ValueError:
             self.show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
 
-    def show_wspolrzedne_prostokatne_dialog(self):
+        ok_button_clicked = pyqtSignal()
+
+    def show_wspolrzedne_prostokatne_dialog(self, azymut, odleglosc):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Przejdziemy teraz do współrzędnych prostokątnych.\n"
@@ -55,12 +57,37 @@ class OknoZGZ(QWidget):
                     "Zależy od Ciebie, z jaką dokładnością chcesz pracować.")
 
         # Dodajemy pola do wprowadzenia współrzędnych
-        rzeda_A, ok1 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj rzędą A:')
-        odcieta_A, ok2 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj odciętą A:')
+        rzedna_a, ok1 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj rzędna A:')
+        odcieta_a, ok2 = QInputDialog.getInt(self, 'Podaj wartość', 'Podaj odciętą A:')
 
         if ok1 and ok2:
-            print(f"Wprowadzone współrzędne prostokątne: rzęda_A={rzeda_A}, odcieta_A={odcieta_A}")
-            self.close()
+            print(f"Wprowadzone współrzędne prostokątne: rzęda_A={rzedna_a}, odcieta_A={odcieta_a}")
+            self.perform_calculations(azymut, odleglosc, rzedna_a, odcieta_a)
+
+    def perform_calculations(self, azymut, odleglosc, rzedna_a, odcieta_a):
+        azymut_w_stopniach = azymut * 0.06
+        przyrost_rzedna = math.sin(math.radians(azymut_w_stopniach))
+        przyrost_odcieta = math.cos(math.radians(azymut_w_stopniach))
+        przyrost_a = przyrost_rzedna * odleglosc
+        przyrost_b = przyrost_odcieta * odleglosc
+        rzedna_b = rzedna_a + przyrost_a
+        odcieta_b = odcieta_a + przyrost_b
+
+        self.show_wyniki_dialog(azymut_w_stopniach, przyrost_a, przyrost_b, rzedna_b, odcieta_b)
+
+    def show_wyniki_dialog(self, azymut_w_stopniach, przyrost_a, przyrost_b, rzedna_b, odcieta_b):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(f"Azymut w stopniach: {azymut_w_stopniach:.2f}\n"
+                    f"Przyrost rzędna: {przyrost_a:.2f}\n"
+                    f"Przyrost odcięta: {przyrost_b:.2f}\n"
+                    f"Rzędna B: {rzedna_b:.0f}\n"
+                    f"Odcięta B: {odcieta_b:.0f}")
+        msg.setWindowTitle("Wyniki obliczeń")
+        msg.addButton(QMessageBox.Ok)
+        msg.exec_()
+
+        self.close()
 
     def powrot_button_clicked(self):
         self.close()
@@ -94,24 +121,16 @@ class MojaAplikacja(QWidget):
 
         self.setLayout(layout)
 
-        zgzs_button.clicked.connect(self.zgzs_clicked)
+        zgzs_button.clicked.connect(self.zgzs_clicked)  # Dodaj to połączenie
         zgzo_button.clicked.connect(self.zgzo_clicked)
 
     def zgzs_clicked(self):
-        self.objasnienie_label.setText('Istotą zadania geodezyjnego zwykłego\n'
-                                       '(ZGZ) – jest wyznaczenie współrzędnych prostokątnych punktu końcowego (punkt '
-                                       'B),\n'
-                                       ' na podstawie współrzędnych prostokątnych punktu wyjściowego (punktu A) oraz\n'
-                                       ' azymutu (T-AB) i odległości (-dAB-) między nimi.')
-
-        self.okno_zgz = OknoZGZ(self)
-        self.okno_zgz.show()
+        self.okno_zgz = OknoZGZ(self)  # Tworzymy nowe okno OknoZGZ
+        self.okno_zgz.show()  # Pokazujemy nowe okno
 
     def zgzo_clicked(self):
-        self.objasnienie_label.setText('Istotą zadania geodezyjnego odwrotnego (ZGO)-\n jest wyznaczanie azymutu '
-                                       'topograficznego (TAB) i odległości (-dAB-) między punktami A i B na podstawie\n'
-                                       'współrzędnych prostokątnych punktu A oraz współrzędnych prostokątnych punktu '
-                                       'B.')
+        self.okno_zgo = OknoZGZ(self)  # Tworzymy nowe okno OknoZGO (przykładowo)
+        self.okno_zgo.show()  # Pokazujemy nowe okno
 
 
 if __name__ == '__main__':
