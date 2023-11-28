@@ -206,7 +206,7 @@ class OknoZGO(QWidget):
             przyrost_odcieta1 = self.odcieta_b_zgo - self.odcieta_a_zgo
             dowolna = przyrost_rzedna1 / przyrost_odcieta1
             dowolna = abs(dowolna)
-            tan_roznicy_przyrostu = math.atan(dowolna)
+            tan_roznicy_przyrostu = math.degrees(math.atan(dowolna))
             azymut_zgo = tan_roznicy_przyrostu / 0.06
             if przyrost_rzedna1 > 0 and przyrost_odcieta1 > 0:
                 ab = azymut_zgo
@@ -224,7 +224,7 @@ class OknoZGO(QWidget):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText(
-            f"Przyrost rzednej:{przyrost_rzedna1:.2f}\n"f"Przyrost odcięta:{przyrost_odcieta1:.2f}\n"f"Iloczyn przyrostów:{dowolna:.2f}\n"f"tangens podniesiony do -1:{tan_roznicy_przyrostu:.2f}\n"f"Azymut przed czwartakiem:{azymut_zgo:.2f}\n"f"szukany azymut:{ab:.0f}\n"f"Odległość z punktu A do punktu B:{odleglosc_ab:.0f}")
+            f"Przyrost rzednej:{przyrost_rzedna1:.2f}\n"f"Przyrost odcięta:{przyrost_odcieta1:.2f}\n"f"Iloczyn przyrostów:{dowolna:.2f}\n"f"tangens podniesiony do -1:{tan_roznicy_przyrostu:.2f}\n"f"Azymut przed czwartakiem:{azymut_zgo:.2f}\n"f"szukany azymut:{ab:.2f}\n"f"Odległość z punktu A do punktu B:{odleglosc_ab:.0f}")
         msg.setWindowTitle("Wyniki obliczeń")
         msg.addButton(QMessageBox.Ok)
         msg.exec_()
