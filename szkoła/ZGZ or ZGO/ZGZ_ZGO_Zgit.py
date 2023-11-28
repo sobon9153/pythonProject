@@ -51,7 +51,7 @@ class OknoZGZ(QWidget):
                     print(f"Podana odległość: {odleglosc}")
                     self.show_wspolrzedne_prostokatne_dialog(azymut, odleglosc)
             else:
-                show_error_message("Podano azymut spoza zakresu 0-360 stopni.")
+                show_error_message("Podano azymut spoza zakresu 0- 6000 ")
         except ValueError:
             show_error_message("Podana nieprawidłowa wartość. Spróbuj jeszcze raz.")
 
@@ -106,6 +106,10 @@ class OknoZGO(QWidget):
         super().__init__()
 
         self.poprzednie_okno = poprzednie_okno
+        self.rzedna_a_zgo = None
+        self.odcieta_a_zgo = None
+        self.rzedna_b_zgo = None
+        self.odcieta_b_zgo = None
         self.init_ui()
 
     def init_ui(self):
@@ -140,14 +144,15 @@ class OknoZGO(QWidget):
         self.setLayout(main_layout)
         self.ok_button.clicked.connect(self.przetworz_dane_a)
         self.ok_button.clicked.connect(self.przetworz_dane_b)
+        self.ok_button.clicked.connect(self.perform_calculations)
+
+        self.powrot_button.clicked.connect(self.powrot_button_clicked)
 
     def przetworz_dane_a(self):
         rzedna_a_zgo = self.rzedna_a_zgo.text()
         odcieta_a_zgo = self.odcieta_a_zgo.text()
 
-        if len(rzedna_a_zgo) == 5 and rzedna_a_zgo.isdigit():
-            rzedna_a_zgo = float(rzedna_a_zgo)
-        else:
+        if 5 != len(rzedna_a_zgo) or not rzedna_a_zgo.isdigit():
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setText("Podałeś złe wartości dla rzędnej punktu A. Muszą być to dokładnie 5 cyfr.")
@@ -156,9 +161,7 @@ class OknoZGO(QWidget):
             msg.exec_()
             return
 
-        if len(odcieta_a_zgo) == 5 and odcieta_a_zgo.isdigit():
-            odcieta_a_zgo = float(odcieta_a_zgo)
-        else:
+        if len(odcieta_a_zgo) != 5 or not odcieta_a_zgo.isdigit():
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setText("Podałeś złe wartości dla odciętej punktu A. Muszą być to dokładnie 5 cyfr.")
@@ -167,14 +170,14 @@ class OknoZGO(QWidget):
             msg.exec_()
             return
 
+        self.rzedna_a_zgo = int(rzedna_a_zgo)
+        self.odcieta_a_zgo = int(odcieta_a_zgo)
 
     def przetworz_dane_b(self):
         rzedna_b_zgo = self.rzedna_b_zgo.text()
         odcieta_b_zgo = self.odcieta_b_zgo.text()
 
-        if len(rzedna_b_zgo) == 5 and rzedna_b_zgo.isdigit():
-            rzedna_b_zgo = float(rzedna_b_zgo)
-        else:
+        if len(rzedna_b_zgo) != 5 or not rzedna_b_zgo.isdigit():
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setText("Podałeś złe wartości dla rzędnej punktu B. Muszą być to dokładnie 5 cyfr.")
@@ -183,9 +186,7 @@ class OknoZGO(QWidget):
             msg.exec_()
             return
 
-        if len(odcieta_b_zgo) == 5 and odcieta_b_zgo.isdigit():
-            odcieta_b_zgo = float(odcieta_b_zgo)
-        else:
+        if len(odcieta_b_zgo) != 5 or not odcieta_b_zgo.isdigit():
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setText("Podałeś złe wartości dla ociętej punktu B. Muszą być to dokładnie 5 cyfr.")
@@ -194,9 +195,44 @@ class OknoZGO(QWidget):
             msg.exec_()
             return
 
+        self.rzedna_b_zgo = int(rzedna_b_zgo)
+        self.odcieta_b_zgo = int(odcieta_b_zgo)
 
+    def perform_calculations(self):
+        if self.rzedna_a_zgo is not None and self.odcieta_a_zgo is not None and \
+           self.rzedna_b_zgo is not None and self.odcieta_b_zgo is not None:
 
-        pass
+            przyrost_rzedna1 = self.rzedna_b_zgo - self.rzedna_a_zgo
+            przyrost_odcieta1 = self.odcieta_b_zgo - self.odcieta_a_zgo
+            dowolna = przyrost_rzedna1 / przyrost_odcieta1
+            dowolna = abs(dowolna)
+            tan_roznicy_przyrostu = math.atan(dowolna)
+            azymut_zgo = tan_roznicy_przyrostu / 0.06
+            if przyrost_rzedna1 > 0 and przyrost_odcieta1 > 0:
+                ab = azymut_zgo
+            elif przyrost_rzedna1 > 0 > przyrost_odcieta1:
+                ab = 30.00 - azymut_zgo
+            elif przyrost_rzedna1 < 0 and przyrost_odcieta1 < 0:
+                ab = 30.00 + azymut_zgo
+            elif przyrost_rzedna1 < 0 < przyrost_odcieta1:
+                ab = 60.00 - azymut_zgo
+
+            odleglosc_ab = math.sqrt(przyrost_rzedna1 ** 2 + przyrost_odcieta1 ** 2)
+            self.show_wyniki_dialog_zgo(przyrost_rzedna1, przyrost_odcieta1, dowolna, tan_roznicy_przyrostu, azymut_zgo, ab, odleglosc_ab)
+
+    def show_wyniki_dialog_zgo(self,przyrost_rzedna1, przyrost_odcieta1, dowolna, tan_roznicy_przyrostu, azymut_zgo, ab, odleglosc_ab):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(
+            f"Przyrost rzednej:{przyrost_rzedna1:.2f}\n"f"Przyrost odcięta:{przyrost_odcieta1:.2f}\n"f"Iloczyn przyrostów:{dowolna:.2f}\n"f"tangens podniesiony do -1:{tan_roznicy_przyrostu:.2f}\n"f"Azymut przed czwartakiem:{azymut_zgo:.2f}\n"f"szukany azymut:{ab:.0f}\n"f"Odległość z punktu A do punktu B:{odleglosc_ab:.0f}")
+        msg.setWindowTitle("Wyniki obliczeń")
+        msg.addButton(QMessageBox.Ok)
+        msg.exec_()
+        self.close()
+
+    def powrot_button_clicked(self):
+        self.close()
+        self.poprzednie_okno.show()
 
 
 class MojaAplikacja(QWidget):
